@@ -8,6 +8,10 @@ defmodule Fawkes.Listener.Store do
     GenServer.start_link(__MODULE__, listeners, name: __MODULE__)
   end
 
+  def add(matcher, command) do
+    GenServer.call(__MODULE__, {:add, matcher, command})
+  end
+
   def listeners(table \\ __MODULE__) do
     case :ets.lookup(table, :listeners) do
       [] -> []
@@ -19,6 +23,12 @@ defmodule Fawkes.Listener.Store do
     __MODULE__ = :ets.new(__MODULE__, [:set, :named_table, :protected])
     :ets.insert(__MODULE__, {:listeners, listeners})
 
-    {:ok, table: __MODULE__, listeners: listeners}
+    {:ok, %{table: __MODULE__, listeners: listeners}}
+  end
+
+  def handle_call({:add, matcher, command}, _from, state) do
+    state = %{state | listeners: [{matcher, command} | state.listeners]}
+    :ets.insert(__MODULE__, {:listeners, state.listeners})
+    {:reply, :ok, state}
   end
 end

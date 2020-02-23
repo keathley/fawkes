@@ -19,7 +19,7 @@ defmodule Fawkes.Application do
 
   def scripts do
     [
-      Fawkes.Scripts.Echo,
+      # Fawkes.Scripts.Echo,
     ]
   end
 

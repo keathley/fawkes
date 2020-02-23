@@ -20,12 +20,16 @@ defmodule Fawkes.Slack do
   end
 
   def handle_event(message = %{type: "message"}, slack, state) do
+    # IO.inspect([message, slack], label: "Slack")
     user    = user(message, slack)
     channel = channel(message, slack)
     msg     = %Message{
+      bot: self(),
       text: message.text,
       user: user,
-      channel: channel
+      channel: channel,
+      bot_name: "<@#{slack.me.id}>",
+      bot_alias: ".", # TODO - Make this configurable
     }
 
     Fawkes.Listener.handle_message(msg)
@@ -34,13 +38,21 @@ defmodule Fawkes.Slack do
   end
   def handle_event(_, _, state), do: {:ok, state}
 
-  def handle_info({:message, text, channel}, slack, state) do
-    Logger.debug(fn -> "Sending message to #{channel}" end)
-    send_message(text, channel, slack)
-
+  def handle_info({:say, msg, text}, slack, state) do
+    send_message(text, msg.channel.id, slack)
     {:ok, state}
   end
-  def handle_info(_, _, state), do: {:ok, state}
+
+  def handle_info({:reply, msg, text}, slack, state) do
+    text = "<@#{msg.user.id}> #{text}"
+    send_message(text, msg.channel.id, slack)
+    {:ok, state}
+  end
+
+  def handle_info(msg, _, state) do
+    Logger.info(fn -> "Unhandled message: #{msg}" end)
+    {:ok, state}
+  end
 
   defp channel(%{channel: id}, slack) do
     case slack.channels[id] do
