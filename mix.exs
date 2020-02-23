@@ -14,8 +14,7 @@ defmodule Fawkes.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Fawkes.Application, []}
+      extra_applications: [:logger]
     ]
   end
 
@@ -23,7 +22,7 @@ defmodule Fawkes.MixProject do
   defp deps do
     [
       {:slack, "~> 0.20"},
-      {:vapor, "~> 0.7"},
+      {:gen_stage, "~> 1.0"},
     ]
   end
 end
