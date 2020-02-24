@@ -52,7 +52,17 @@ defmodule Fawkes.MixProject do
     [
       source_ref: "v#{@version}",
       source_url: "https://github.com/keathley/fawkes",
-      main: "Fawkes"
+      main: "Fawkes",
+      groups_for_modules: [
+        "Events": [
+          Fawkes.Event.Message,
+          Fawkes.Event.ReactionAdded,
+          Fawkes.Event.ReactionRemoved,
+          Fawkes.Event.TopicChanged,
+          Fawkes.Event.ChannelJoined,
+          Fawkes.Event.ChannelLeft,
+        ]
+      ]
     ]
   end
 end
