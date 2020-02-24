@@ -1,16 +1,23 @@
 defmodule Fawkes do
-  @moduledoc """
-  """
+  @moduledoc "README.md"
+             |> File.read!()
+             |> String.split("<!-- MDOC !-->")
+             |> Enum.fetch!(1)
+
   use Supervisor
 
   alias Fawkes.EventProducer
   alias Fawkes.EventProcessor
 
+  @doc """
+  Starts a new robot.
+  """
   def start_link(opts) do
     name = opts[:name] || raise ArgumentError, "Fawkes requires `:name`"
     Supervisor.start_link(__MODULE__, opts, name: name)
   end
 
+  @doc false
   def init(opts) do
     # TODO - Validate all of this with Norm.
     name                    = opts[:name]

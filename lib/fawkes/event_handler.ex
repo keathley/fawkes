@@ -1,6 +1,6 @@
 defmodule Fawkes.EventHandler do
   @moduledoc """
-  Defines a behaviour for building event handlers
+  Defines a behaviour for building event handlers.
   """
 
   alias Fawkes.Event
