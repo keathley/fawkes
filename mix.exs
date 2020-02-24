@@ -24,6 +24,7 @@ defmodule Fawkes.MixProject do
     [
       {:slack, "~> 0.20"},
       {:vapor, "~> 0.7"},
+      {:gen_stage, "~> 1.0"},
     ]
   end
 end

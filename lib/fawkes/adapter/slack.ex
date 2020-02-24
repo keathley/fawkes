@@ -1,7 +1,13 @@
-defmodule Fawkes.Slack do
+defmodule Fawkes.Adapter.Slack do
   use Slack
 
-  alias Fawkes.Message
+  alias Fawkes.Event.{
+    Message,
+    ReactionAdded,
+    ReactionRemoved,
+    ChannelJoined,
+    ChannelLeft,
+  }
 
   require Logger
 
@@ -19,24 +25,53 @@ defmodule Fawkes.Slack do
     {:ok, state}
   end
 
-  def handle_event(message = %{type: "message"}, slack, state) do
-    # IO.inspect([message, slack], label: "Slack")
-    user    = user(message, slack)
-    channel = channel(message, slack)
-    msg     = %Message{
-      bot: self(),
-      text: message.text,
-      user: user,
-      channel: channel,
-      bot_name: "<@#{slack.me.id}>",
-      bot_alias: ".", # TODO - Make this configurable
-    }
+  def handle_event(event, slack, state) do
+    event = build_event(event, slack)
 
-    Fawkes.Listener.handle_message(msg)
+    unless event == nil do
+      Fawkes.EventProducer.notify(Fawkes.EventProducer, event)
+    end
 
     {:ok, state}
   end
-  def handle_event(_, _, state), do: {:ok, state}
+  def handle_event(_event, _, state) do
+    {:ok, state}
+  end
+
+  defp build_event(event, slack) do
+    case event.type do
+      "message" ->
+        user    = user(event, slack)
+        channel = channel(event, slack)
+        %Message{
+          bot: self(),
+          text: event.text,
+          user: user,
+          channel: channel,
+        # bot_name: "<@#{slack.me.id}>",
+        # bot_alias: ".", # TODO - Make this configurable
+        }
+
+      "reaction_added" ->
+        %ReactionAdded{
+          bot: self(),
+          reaction: event.reaction,
+          user: user(event, slack),
+          # TODO - Add the other fields here
+        }
+
+      "reaction_removed" ->
+        %ReactionAdded{
+          bot: self(),
+          reaction: event.reaction,
+          user: user(event, slack),
+          # TODO - Add the other fields here
+        }
+
+      _ ->
+        nil
+    end
+  end
 
   def handle_info({:say, msg, text}, slack, state) do
     send_message(text, msg.channel.id, slack)

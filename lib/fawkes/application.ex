@@ -4,13 +4,25 @@ defmodule Fawkes.Application do
   use Application
 
   alias Vapor.Provider.{Dotenv, Env}
+  alias Fawkes.EventProducer
+  alias Fawkes.EventProcessor
 
   def start(_type, _args) do
     config = config!()
 
-    children = [
-      {Fawkes.Listener, scripts: scripts()},
-      {Fawkes.Slack, token: config.slack_token},
+    handlers = [{Fawkes.TestHandler, 0}]
+
+    event_handlers = for {handler, init} <- handlers do
+      Supervisor.child_spec(
+        {EventProcessor, [producer: EventProducer, handler: {handler, init}]},
+        id: :"event_processor_#{handler}"
+      )
+    end
+
+    event_pipeline = [{EventProducer, []} | event_handlers]
+
+    children = event_pipeline ++ [
+      {Fawkes.Adapter.Slack, token: config.slack_token},
     ]
 
     opts = [strategy: :one_for_one, name: Fawkes.Supervisor]
