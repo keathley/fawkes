@@ -1,13 +1,20 @@
 defmodule Fawkes.MixProject do
   use Mix.Project
 
+  @version "0.1.0"
+
   def project do
     [
       app: :fawkes,
-      version: "0.1.0",
+      version: @version,
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      description: description(),
+      package: package(),
+      name: "Fawkes",
+      source_url: "https://github.com/keathley/fawkes",
+      docs: docs()
     ]
   end
 
@@ -23,6 +30,29 @@ defmodule Fawkes.MixProject do
     [
       {:slack, "~> 0.20"},
       {:gen_stage, "~> 1.0"},
+      {:ex_doc, "~> 0.19", only: [:dev, :test]},
+    ]
+  end
+
+  def description do
+    """
+    Fawkes is a system for building chatbots.
+    """
+  end
+
+  def package do
+    [
+      name: "fawkes",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/keathley/fawkes"}
+    ]
+  end
+
+  def docs do
+    [
+      source_ref: "v#{@version}",
+      source_url: "https://github.com/keathley/fawkes",
+      main: "Fawkes"
     ]
   end
 end
