@@ -90,7 +90,7 @@ defmodule Fawkes.Bot do
       matches ->
         matches = Enum.drop(matches, 1)
 
-        if Function.info(cb)[:arity] == 2 do
+        if is_function(cb, 2) do
           cb.(matches, event)
           state
         else
@@ -99,4 +99,30 @@ defmodule Fawkes.Bot do
     end
   end
   def hear(_, _, state, _), do: state
+
+  @doc """
+  Defines a generic listener. This listener receives all events and passes them
+  to the matcher function. If the matcher function returns a truthy value then the second
+  callback will be executed with the value passed as the first argument and the event
+  as the second. If the matcher returns false then the callback will be skipped.
+  If you need to return a falsey value from your matcher you will need to wrap it
+  in another value such as a tuple or a map.
+
+  The callback can either be a 2 arity or 3 arity function with the optional 3rd
+  argument being the current state for the handler.
+  """
+  def listen(event, state, matcher, cb) when is_function(matcher) and is_function(cb) do
+    case matcher.(event, state) do
+      false ->
+        state
+
+      val ->
+        if is_function(cb, 2) do
+          cb.(val, event)
+          state
+        else
+          cb.(val, event, state)
+        end
+    end
+  end
 end

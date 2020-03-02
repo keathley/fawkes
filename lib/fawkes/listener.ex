@@ -32,7 +32,7 @@ defmodule Fawkes.Listener do
     regex = Macro.escape(regex)
 
     quote do
-      @listeners %{type: :hear, regex: unquote(regex), f: unquote(f)}
+      @listeners %{type: :hear, matcher: unquote(regex), f: unquote(f)}
     end
   end
 
@@ -41,7 +41,16 @@ defmodule Fawkes.Listener do
     regex = Macro.escape(regex)
 
     quote do
-      @listeners %{type: :respond, regex: unquote(regex), f: unquote(f)}
+      @listeners %{type: :respond, matcher: unquote(regex), f: unquote(f)}
+    end
+  end
+
+  defmacro listen(matcher, f) do
+    matcher = Macro.escape(matcher)
+    f       = Macro.escape(f)
+
+    quote do
+      @listeners %{type: :listen, matcher: unquote(matcher), f: unquote(f)}
     end
   end
 
@@ -61,7 +70,7 @@ defmodule Fawkes.Listener do
 
   defp compile_listener(l) do
     quote do
-      {Fawkes.Bot, unquote(l.type), [unquote(l.regex), unquote(l.f)]}
+      {Fawkes.Bot, unquote(l.type), [unquote(l.matcher), unquote(l.f)]}
     end
   end
 end
