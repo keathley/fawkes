@@ -7,7 +7,7 @@ defmodule Fawkes.EventProcessor do
   end
 
   def init(opts) do
-    producer = opts[:producer] || raise ArgumentError
+    producer        = opts[:producer] || raise ArgumentError
     {handler, args} = opts[:handler] || raise ArgumentError
 
     case handler.init(args) do

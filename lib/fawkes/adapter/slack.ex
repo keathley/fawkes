@@ -3,6 +3,7 @@ defmodule Fawkes.Adapter.Slack do
 
   @behaviour Fawkes.Adapter
 
+  alias Fawkes.EventProducer
   alias Fawkes.Event.{
     Message,
     Mention,
@@ -17,36 +18,49 @@ defmodule Fawkes.Adapter.Slack do
   def child_spec(opts) do
     token = opts[:token] || raise ArgumentError, "Requires a slack token"
     producer = opts[:producer] || raise ArgumentError, "Requires a producer"
+    slack_opts = Map.new(opts[:adapter_options])
+
+    args = [
+      __MODULE__, # The callback module to use,
+      [producer: producer], # Initial arguments
+      token, # Slack API Token
+      slack_opts, # Name and other options. We need this so we can find our adapter later.
+    ]
 
     %{
       id: __MODULE__,
-      start: {Slack.Bot, :start_link, [__MODULE__, [producer: producer], token]},
+      start: {Slack.Bot, :start_link, args},
     }
   end
 
   def say(event, text) do
-    send(event.bot, {:say, event, text})
+    message_adapter(event, {:say, event, text})
   end
 
   def reply(event, text) do
-    send(event.bot, {:reply, event, text})
+    message_adapter(event, {:reply, event, text})
   end
 
   def code(event, text) do
-    send(event.bot, {:code, event, text})
+    message_adapter(event, {:code, event, text})
   end
 
   def message_channel(event, text) do
-    send(event.bot, {:message_channel, event, text})
+    message_adapter(event, {:message_channel, event, text})
+  end
+
+  defp message_adapter(event, msg) do
+    send(Process.whereis(event.bot.adapter_name), msg)
   end
 
   def handle_connect(slack, state) do
     Logger.debug "Connected as #{slack.me.name}"
+    EventProducer.set_bot_name(state[:producer], "@#{slack.me.id}")
     {:ok, state}
   end
 
   def handle_event(event, slack, state) do
-    event = build_event(event, slack)
+    event = build_event(event, slack, state)
 
     unless event == nil do
       Fawkes.EventProducer.notify(state[:producer], event)
@@ -116,22 +130,21 @@ defmodule Fawkes.Adapter.Slack do
     }
   end
 
-  defp build_event(event, slack) do
+  defp build_event(event, slack, state) do
     case event.type do
       "message" ->
         user    = user(event, slack)
         channel = channel(event, slack)
         %Message{
-          handler: __MODULE__,
           bot: self(),
-          text: event.text,
+          text: replace_links(event.text),
           user: user,
           channel: channel,
         }
 
       "reaction_added" ->
         %ReactionAdded{
-          handler: __MODULE__,
+          # handler: __MODULE__,
           bot: self(),
           reaction: event.reaction,
           user: user(event, slack),
@@ -140,8 +153,8 @@ defmodule Fawkes.Adapter.Slack do
 
       "reaction_removed" ->
         %ReactionRemoved{
-          handler: __MODULE__,
-          bot: self(),
+          # handler: __MODULE__,
+          # bot: self(),
           reaction: event.reaction,
           user: user(event, slack),
           # TODO - Add the other fields here
@@ -150,5 +163,10 @@ defmodule Fawkes.Adapter.Slack do
       _ ->
         nil
     end
+  end
+
+  @link_regex ~r/<([^>|]+)>/
+  defp replace_links(text) do
+    Regex.replace(@link_regex, text, fn _, link -> link end)
   end
 end
