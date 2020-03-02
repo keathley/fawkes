@@ -31,6 +31,7 @@ defmodule Fawkes.MixProject do
       {:slack, "~> 0.20"},
       {:gen_stage, "~> 1.0"},
       {:ex_doc, "~> 0.19", only: [:dev, :test]},
+      {:redix, "~> 0.10"},
     ]
   end
 

@@ -1,66 +1,43 @@
 defmodule FawkesTest do
   use ExUnit.Case, async: false
 
+  alias Fawkes.Adapter.TestAdapter
+
   defmodule TestHandler do
     use Fawkes.Listener
 
-    alias Fawkes.Bot
-
-    hear ~r/inc/, fn _matches, _event, {count, parent} ->
-      send(parent, :inced)
-      {count + 1, parent}
+    hear ~r/inc/, fn _matches, event, count ->
+      say(event, "incremented count")
+      count + 1
     end
 
-    hear ~r/count/, fn _matches, _msg, {count, parent} ->
-      send(parent, {:count, count})
-      {count, parent}
+    hear ~r/count/, fn _matches, event, count ->
+      say(event, "Count: #{count}")
+      count
     end
 
-    hear ~r/set (.*) in (.*)/, fn matches, event, {count, parent} ->
-      [value, key] = matches
-
+    hear ~r/set (.*) in (.*)/, fn [value, key], event ->
       result = Fawkes.Bot.set(event, key, value)
-      send(parent, {:set, result})
-
-      {count, parent}
+      if result == :ok do
+        say(event, "Ok, I set '#{key}'")
+      else
+        say(event, "Something went wrong")
+      end
     end
 
-    hear ~r/get (.*)/, fn matches, msg, {count, parent} ->
-      val = Bot.get(msg, Enum.at(matches, 0))
-      send(parent, {:get, val})
-      {count, parent}
-    end
-  end
-
-  defmodule TestAdapter do
-    use GenServer
-
-    def start_link(opts) do
-      GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-    end
-
-    def msg(text) do
-      GenServer.call(__MODULE__, {:msg, text})
-    end
-
-    def init(state) do
-      {:ok, Map.new(state)}
-    end
-
-    def handle_call({:msg, text}, _from, state) do
-      Fawkes.EventProducer.notify(state.producer, %Fawkes.Event.Message{text: text})
-
-      {:reply, :ok, state}
+    hear ~r/get (.*)/, fn [key], event ->
+      {:ok, val} = Fawkes.Bot.get(event, key)
+      say(event, "The value of '#{key}' is '#{val}'")
     end
   end
 
   setup do
     opts = [
       name: TestBot,
-      adapter: {TestAdapter, []},
+      adapter: {TestAdapter, [parent: self()]},
       brain: {Fawkes.Brain.InMemory, []},
       handlers: [
-        {TestHandler, {0, self()}},
+        {TestHandler, 0},
       ],
     ]
     {:ok, pid} = Fawkes.start_link(opts)
@@ -72,19 +49,19 @@ defmodule FawkesTest do
     {:ok, bot: TestBot}
   end
 
-  test "can be started", %{bot: bot} do
-    TestAdapter.msg("inc")
-    assert_receive :inced
+  test "can be started" do
+    TestAdapter.chat("inc")
+    assert_receive {:say, "incremented count"}
 
-    TestAdapter.msg("count")
-    assert_receive {:count, 1}
+    TestAdapter.chat("count")
+    assert_receive {:say, "Count: 1"}
   end
 
-  test "bot can store data in its brain", %{bot: bot} do
-    TestAdapter.msg("set this in that")
-    assert_receive {:set, :ok}
+  test "bot can store data in its brain" do
+    TestAdapter.chat("set this in that")
+    assert_receive {:say, "Ok, I set 'that'"}
 
-    TestAdapter.msg("get that")
-    assert_receive {:get, "this"}
+    TestAdapter.chat("get that")
+    assert_receive {:say, "The value of 'that' is 'this'"}
   end
 end

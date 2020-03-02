@@ -22,7 +22,7 @@ defmodule Fawkes.Brain.InMemory do
   end
 
   def handle_call({:get, key}, _from, data) do
-    {:reply, data[key], data}
+    {:reply, {:ok, data[key]}, data}
   end
 
   def handle_call({:set, key, value}, _from, data) do
