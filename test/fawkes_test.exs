@@ -64,4 +64,8 @@ defmodule FawkesTest do
     TestAdapter.chat("get that")
     assert_receive {:say, "The value of 'that' is 'this'"}
   end
+
+  test "bot provides help" do
+    flunk "Not tested yet"
+  end
 end

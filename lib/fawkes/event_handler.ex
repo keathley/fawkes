@@ -6,5 +6,6 @@ defmodule Fawkes.EventHandler do
   alias Fawkes.Event
 
   @callback init(Fawkes.Bot.t(), term()) :: {:ok, term()}
+  @callback help() :: String.t()
   @callback handle_event(Event.t, term()) :: {:ok, term()}
 end

@@ -7,6 +7,7 @@ defmodule Fawkes.Listener do
       import Fawkes.Bot, only: [reply: 2, say: 2, code: 2]
 
       @before_compile unquote(__MODULE__)
+
       @behaviour Fawkes.EventHandler
 
       def init(_bot, state) do
@@ -22,7 +23,16 @@ defmodule Fawkes.Listener do
 
     ast = compile_listeners(listeners)
 
+    help_msg =
+      listeners
+      |> Enum.map(& &1.help)
+      |> Enum.join()
+
     quote do
+      def help do
+        unquote(help_msg)
+      end
+
       unquote(ast)
     end
   end
@@ -32,7 +42,9 @@ defmodule Fawkes.Listener do
     regex = Macro.escape(regex)
 
     quote do
-      @listeners %{type: :hear, matcher: unquote(regex), f: unquote(f)}
+      help = Module.get_attribute(__MODULE__, :help)
+      Module.delete_attribute(__MODULE__, :help)
+      @listeners %{type: :hear, matcher: unquote(regex), f: unquote(f), help: help}
     end
   end
 
@@ -41,7 +53,9 @@ defmodule Fawkes.Listener do
     regex = Macro.escape(regex)
 
     quote do
-      @listeners %{type: :respond, matcher: unquote(regex), f: unquote(f)}
+      help = Module.get_attribute(__MODULE__, :help)
+      Module.delete_attribute(__MODULE__, :help)
+      @listeners %{type: :respond, matcher: unquote(regex), f: unquote(f), help: help}
     end
   end
 
@@ -50,7 +64,9 @@ defmodule Fawkes.Listener do
     f       = Macro.escape(f)
 
     quote do
-      @listeners %{type: :listen, matcher: unquote(matcher), f: unquote(f)}
+      help = Module.get_attribute(__MODULE__, :help)
+      Module.delete_attribute(__MODULE__, :help)
+      @listeners %{type: :listen, matcher: unquote(matcher), f: unquote(f), help: help}
     end
   end
 

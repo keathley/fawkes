@@ -36,6 +36,13 @@ defmodule Fawkes do
       brain_name: brain_name(name),
     }
 
+    handler_modules =
+      handlers
+      |> Enum.map(fn {mod, _} -> mod end)
+
+    handler_modules = Enum.concat([Fawkes.Handlers.Help], handler_modules)
+    handlers = [{Fawkes.Handlers.Help, handler_modules} | handlers]
+
     event_handlers = for {handler, init} <- handlers do
       Supervisor.child_spec(
         {EventProcessor, [
