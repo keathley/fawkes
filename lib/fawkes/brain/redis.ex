@@ -15,15 +15,12 @@ defmodule Fawkes.Brain.Redis do
   end
 
   def get(name, key) do
-    case Redix.command(name, ["GET", key]) do
-      {:ok, nil} ->
-        {:ok, nil}
+    case Redix.command!(name, ["GET", key]) do
+      nil ->
+        nil
 
-      {:ok, value} ->
-        {:ok, :erlang.binary_to_term(value)}
-
-      error ->
-        error
+      value ->
+        :erlang.binary_to_term(value)
     end
   end
 

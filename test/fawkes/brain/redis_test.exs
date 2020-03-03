@@ -6,7 +6,7 @@ defmodule Fawkes.Brain.RedisTest do
   test "stores and retrieves complex values" do
     {:ok, brain} = Redis.start_link(name: TestBrain)
     assert :ok = Redis.set(brain, "complex", %{set: MapSet.new([1,2,3])})
-    assert Redis.get(brain, "complex") == {:ok, %{set: MapSet.new([1,2,3])}}
+    assert Redis.get(brain, "complex") == %{set: MapSet.new([1,2,3])}
   end
 
   test "can be started as part of a bot" do
@@ -18,6 +18,6 @@ defmodule Fawkes.Brain.RedisTest do
     brain = BrainTestBot.Brain
 
     assert :ok = Redis.set(brain, "complex", %{set: MapSet.new([1,2,3])})
-    assert Redis.get(brain, "complex") == {:ok, %{set: MapSet.new([1,2,3])}}
+    assert Redis.get(brain, "complex") == %{set: MapSet.new([1,2,3])}
   end
 end

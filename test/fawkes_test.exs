@@ -17,7 +17,7 @@ defmodule FawkesTest do
     end
 
     hear ~r/set (.*) in (.*)/, fn [value, key], event ->
-      result = Fawkes.Bot.set(event, key, value)
+      result = Fawkes.Bot.set(event.bot, key, value)
       if result == :ok do
         say(event, "Ok, I set '#{key}'")
       else
@@ -26,7 +26,7 @@ defmodule FawkesTest do
     end
 
     hear ~r/get (.*)/, fn [key], event ->
-      {:ok, val} = Fawkes.Bot.get(event, key)
+      {:ok, val} = Fawkes.Bot.get(event.bot, key)
       say(event, "The value of '#{key}' is '#{val}'")
     end
   end

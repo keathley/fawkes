@@ -2,8 +2,6 @@ defmodule Fawkes.Handlers.Echo do
   @moduledoc false
   use Fawkes.Listener
 
-  alias Fawkes.Bot
-
   respond ~r/echome (.*)/, fn [match], event ->
     reply(event, match)
   end

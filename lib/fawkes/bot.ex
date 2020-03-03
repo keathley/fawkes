@@ -5,6 +5,7 @@ defmodule Fawkes.Bot do
   defstruct ~w|id bot_name bot_alias adapter adapter_name brain brain_name|a
 
   alias Fawkes.Event.Message
+  alias __MODULE__
 
   @type t :: %__MODULE__{}
 
@@ -37,11 +38,11 @@ defmodule Fawkes.Bot do
   #   bot.adapter.message_channel(bot.id, text)
   # end
 
-  def set(%{bot: bot}, key, value) do
+  def set(%Bot{}=bot, key, value) do
     bot.brain.set(bot.brain_name, key, value)
   end
 
-  def get(%{bot: bot}, key) do
+  def get(%Bot{}=bot, key) do
     bot.brain.get(bot.brain_name, key)
   end
 

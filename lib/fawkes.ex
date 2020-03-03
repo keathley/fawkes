@@ -38,7 +38,11 @@ defmodule Fawkes do
 
     event_handlers = for {handler, init} <- handlers do
       Supervisor.child_spec(
-        {EventProcessor, [producer: producer_name(name), handler: {handler, init}]},
+        {EventProcessor, [
+          bot: bot,
+          producer: producer_name(name),
+          handler: {handler, init}
+        ]},
         id: :"fawkes_event_processor_#{handler}"
       )
     end

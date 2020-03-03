@@ -8,6 +8,12 @@ defmodule Fawkes.Listener do
 
       @before_compile unquote(__MODULE__)
       @behaviour Fawkes.EventHandler
+
+      def init(_bot, state) do
+        {:ok, state}
+      end
+
+      defoverridable init: 2
     end
   end
 
@@ -17,13 +23,7 @@ defmodule Fawkes.Listener do
     ast = compile_listeners(listeners)
 
     quote do
-      def init(state) do
-        {:ok, state}
-      end
-
       unquote(ast)
-
-      defoverridable init: 1
     end
   end
 
