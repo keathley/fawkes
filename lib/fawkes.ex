@@ -31,6 +31,7 @@ defmodule Fawkes do
       id: name,
       adapter: adapter,
       adapter_name: adapter_name(name),
+      bot_name: opts[:bot_name],
       bot_alias: opts[:bot_alias],
       brain: brain,
       brain_name: brain_name(name),

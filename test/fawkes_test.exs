@@ -2,49 +2,23 @@ defmodule FawkesTest do
   use ExUnit.Case, async: false
 
   alias Fawkes.Adapter.TestAdapter
-
-  defmodule TestHandler do
-    use Fawkes.Listener
-
-    hear ~r/inc/, fn _matches, event, count ->
-      say(event, "incremented count")
-      count + 1
-    end
-
-    hear ~r/count/, fn _matches, event, count ->
-      say(event, "Count: #{count}")
-      count
-    end
-
-    hear ~r/set (.*) in (.*)/, fn [value, key], event ->
-      result = Fawkes.Bot.set(event.bot, key, value)
-      if result == :ok do
-        say(event, "Ok, I set '#{key}'")
-      else
-        say(event, "Something went wrong")
-      end
-    end
-
-    hear ~r/get (.*)/, fn [key], event ->
-      {:ok, val} = Fawkes.Bot.get(event.bot, key)
-      say(event, "The value of '#{key}' is '#{val}'")
-    end
-  end
+  alias Fawkes.TestHandlers
 
   setup do
     opts = [
       name: TestBot,
+      bot_name: "fawkes",
+      bot_alias: ".",
       adapter: {TestAdapter, [parent: self()]},
       brain: {Fawkes.Brain.InMemory, []},
       handlers: [
-        {TestHandler, 0},
+        {TestHandlers.Counter, 0},
+        {TestHandlers.Brain, nil},
       ],
     ]
-    {:ok, pid} = Fawkes.start_link(opts)
+    # {:ok, pid} = Fawkes.start_link(opts)
 
-    on_exit fn ->
-      Process.exit(pid, :brutal_kill)
-    end
+    start_supervised({Fawkes, opts})
 
     {:ok, bot: TestBot}
   end
@@ -66,6 +40,14 @@ defmodule FawkesTest do
   end
 
   test "bot provides help" do
-    flunk "Not tested yet"
+    TestAdapter.chat(".help")
+    assert_receive {:code, help}
+    assert help == """
+    .help - Prints this help message
+    count - Returns the count
+    inc - Increments the internal counter
+    get <key> - Gets the value from the bots brain
+    set <value> in <key> - Sets the value in the key in the bot's brain
+    """ |> String.trim
   end
 end
