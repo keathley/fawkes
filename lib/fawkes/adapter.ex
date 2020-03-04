@@ -8,5 +8,4 @@ defmodule Fawkes.Adapter do
   @callback say(event(), binary()) :: term()
   @callback reply(event(), binary()) :: term()
   @callback code(event(), binary()) :: term()
-  @callback message_channel(event(), binary()) :: term()
 end

@@ -13,30 +13,48 @@ defmodule Fawkes.EventProducer do
     GenStage.cast(name, {:notify, event})
   end
 
-  def init(_opts) do
-    {:producer, {:queue.new(), 0}, dispatcher: GenStage.BroadcastDispatcher}
+  def set_bot_name(server, name) do
+    GenStage.call(server, {:set_bot_name, name})
   end
 
-  def handle_cast({:notify, event}, {queue, pending_demand}) do
-    queue = :queue.in(event, queue)
-    dispatch_events(queue, pending_demand, [])
+  def init(opts) do
+    state = %{
+      bot: opts[:bot],
+      q: :queue.new(),
+      demand: 0,
+    }
+    {:producer, state, dispatcher: GenStage.BroadcastDispatcher}
   end
 
-  def handle_demand(incoming_demand, {queue, pending_demand}) do
-    dispatch_events(queue, incoming_demand + pending_demand, [])
+  def handle_call({:set_bot_name, name}, _from, state) do
+    state = %{state | bot: %{state.bot | bot_name: name}}
+    # state = put_in(state, [:bot, :bot_name], name)
+    {:reply, :ok, [], state}
   end
 
-  defp dispatch_events(queue, 0, events) do
-    {:noreply, Enum.reverse(events), {queue, 0}}
+  def handle_cast({:notify, event}, state) do
+    state = %{state | q: :queue.in(event, state.q)}
+    dispatch_events(state, [])
   end
 
-  defp dispatch_events(queue, demand, events) do
-    case :queue.out(queue) do
-      {{:value, event}, queue} ->
-        dispatch_events(queue, demand - 1, [event | events])
+  def handle_demand(inc, state) do
+    state = %{state | demand: state.demand + inc}
+    dispatch_events(state, [])
+  end
 
-      {:empty, queue} ->
-        {:noreply, Enum.reverse(events), {queue, demand}}
+  defp dispatch_events(%{demand: 0}=state, events) do
+    {:noreply, Enum.reverse(events), state}
+  end
+
+  defp dispatch_events(%{q: q, demand: demand}=state, events) do
+    case :queue.out(q) do
+      {{:value, event}, q} ->
+        state = %{state | q: q, demand: demand - 1}
+        event = %{event | bot: state.bot}
+        dispatch_events(state, [event | events])
+
+      {:empty, q} ->
+        {:noreply, Enum.reverse(events), %{state | q: q}}
     end
   end
 end

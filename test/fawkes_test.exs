@@ -1,55 +1,53 @@
 defmodule FawkesTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
-  defmodule TestHandler do
-    @behaviour Fawkes.EventHandler
+  alias Fawkes.Adapter.TestAdapter
+  alias Fawkes.TestHandlers
 
-    def init({count, parent}) do
-      {:ok, {count, parent}}
-    end
+  setup do
+    opts = [
+      name: TestBot,
+      bot_name: "fawkes",
+      bot_alias: ".",
+      adapter: {TestAdapter, [parent: self()]},
+      brain: {Fawkes.Brain.InMemory, []},
+      handlers: [
+        {TestHandlers.Counter, 0},
+        {TestHandlers.Brain, nil},
+      ],
+    ]
+    # {:ok, pid} = Fawkes.start_link(opts)
 
-    def handle_event(_event, {count, parent}) do
-      send(parent, {:count, count})
-      {count + 1, parent}
-    end
-  end
+    start_supervised({Fawkes, opts})
 
-  defmodule TestAdapter do
-    use GenServer
-
-    def start_link(opts) do
-      GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-    end
-
-    def msg(text) do
-      GenServer.call(__MODULE__, {:msg, text})
-    end
-
-    def init(state) do
-      {:ok, Map.new(state)}
-    end
-
-    def handle_call({:msg, text}, _from, state) do
-      Fawkes.EventProducer.notify(state.producer, %Fawkes.Event.Message{text: text})
-
-      {:reply, :ok, state}
-    end
+    {:ok, bot: TestBot}
   end
 
   test "can be started" do
-    opts = [
-      name: TestFawkes,
-      adapter: {TestAdapter, []},
-      handlers: [
-        {TestHandler, {0, self()}},
-      ],
-    ]
-    {:ok, _pid} = Fawkes.start_link(opts)
+    TestAdapter.chat("inc")
+    assert_receive {:say, "incremented count"}
 
-    TestAdapter.msg("Some text")
-    assert_receive {:count, 0}
+    TestAdapter.chat("count")
+    assert_receive {:say, "Count: 1"}
+  end
 
-    TestAdapter.msg("Some text")
-    assert_receive {:count, 1}
+  test "bot can store data in its brain" do
+    TestAdapter.chat("set this in that")
+    assert_receive {:say, "Ok, I set 'that'"}
+
+    TestAdapter.chat("get that")
+    assert_receive {:say, "The value of 'that' is 'this'"}
+  end
+
+  test "bot provides help" do
+    TestAdapter.chat(".help")
+    assert_receive {:code, help}
+    assert help == """
+    .help - Prints this help message
+    count - Returns the count
+    inc - Increments the internal counter
+    get <key> - Gets the value from the bots brain
+    set <value> in <key> - Sets the value in the key in the bot's brain
+    """ |> String.trim
   end
 end
