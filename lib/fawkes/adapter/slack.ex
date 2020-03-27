@@ -3,6 +3,7 @@ defmodule Fawkes.Adapter.Slack do
 
   @behaviour Fawkes.Adapter
 
+  alias Slack.Web.{Users, Channels}
   alias Fawkes.EventProducer
   alias Fawkes.Event.{
     Message,
@@ -49,16 +50,23 @@ defmodule Fawkes.Adapter.Slack do
   end
 
   def handle_connect(slack, state) do
+    state =
+      state
+      |> Map.new()
+      |> Map.put(:token, slack.token)
+      |> Map.put(:users, %{})
+      |> Map.put(:channels, %{})
+
     Logger.debug "Connected as #{slack.me.name}"
     EventProducer.set_bot_name(state[:producer], "@#{slack.me.id}")
     {:ok, state}
   end
 
-  def handle_event(event, slack, state) do
-    event = build_event(event, slack)
+  def handle_event(event, _slack, state) do
+    {event, state} = build_event(event, state)
 
     unless event == nil do
-      Fawkes.EventProducer.notify(state[:producer], event)
+      Fawkes.EventProducer.notify(state.producer, event)
     end
 
     {:ok, state}
@@ -96,66 +104,69 @@ defmodule Fawkes.Adapter.Slack do
     {:ok, state}
   end
 
-  defp channel(%{channel: id}, slack) do
-    case slack.channels[id] do
-      nil ->
-        %{id: id, name: ""}
-
-      channel ->
-        %{id: id, name: channel}
-    end
-  end
-
-  defp user(%{user: id}, slack) do
-    # We don't guard here because we should never get a message from a user we
-    # don't know.
-    user = slack.users[id]
-
-    name = case user.profile.display_name do
-      "" -> user.name
-      name -> name
-    end
-
-    %{
-      id: id,
-      name: name
-    }
-  end
-
-  defp build_event(event, slack) do
+  defp build_event(event, state) do
     case event.type do
       "message" ->
-        user    = user(event, slack)
-        channel = channel(event, slack)
-        %Message{
+        {channel, state} = get_channel(event.channel, state)
+        {user, state} = get_user(event.user, state)
+
+        event = %Message{
           bot: self(),
           text: replace_links(event.text),
           user: user,
           channel: channel,
         }
+        {event, state}
 
       "reaction_added" ->
-        %ReactionAdded{
-          # handler: __MODULE__,
+        {user, state} = get_user(event.user, state)
+        event = %ReactionAdded{
           bot: self(),
           reaction: event.reaction,
-          user: user(event, slack),
+          user: user,
           # TODO - Add the other fields here
         }
+        {event, state}
 
       "reaction_removed" ->
-        %ReactionRemoved{
-          # handler: __MODULE__,
-          # bot: self(),
+        {user, state} = get_user(event.user, state)
+        event = %ReactionRemoved{
+          bot: self(),
           reaction: event.reaction,
-          user: user(event, slack),
+          user: user,
           # TODO - Add the other fields here
         }
+        {event, state}
 
       _ ->
-        nil
+        {nil, state}
     end
   end
+
+  def get_channel(id, state) do
+    case state.channels[id] do
+      nil ->
+        info = Channels.info(id, %{token: state.token})
+        channel = %{id: id, name: get_in(info, ["channel", "name"])}
+        {channel, put_in(state, [:channels, id], channel)}
+
+      channel ->
+        {channel, state}
+    end
+  end
+
+  def get_user(id, state) do
+    case state.users[id] do
+      nil ->
+        info = Users.info(id, %{token: state.token})
+        user = %{id: id, real_name: get_in(info, ["user", "real_name"])}
+        {user, put_in(state, [:users, id], user)}
+
+      user ->
+        {user, state}
+    end
+  end
+
 
   @link_regex ~r/<([^>|]+)>/
   defp replace_links(text) do
