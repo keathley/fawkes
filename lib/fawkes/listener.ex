@@ -43,14 +43,7 @@ defmodule Fawkes.Listener do
   provided callback function.
   """
   defmacro hear(regex, f) do
-    f = Macro.escape(f)
-    regex = Macro.escape(regex)
-
-    quote do
-      help = Module.get_attribute(__MODULE__, :help)
-      Module.delete_attribute(__MODULE__, :help)
-      @listeners %{type: :hear, matcher: unquote(regex), f: unquote(f), help: help}
-    end
+    build_listener(:hear, regex, f)
   end
 
   @doc """
@@ -59,14 +52,7 @@ defmodule Fawkes.Listener do
   bot as the first part of text.
   """
   defmacro respond(regex, f) do
-    f = Macro.escape(f)
-    regex = Macro.escape(regex)
-
-    quote do
-      help = Module.get_attribute(__MODULE__, :help)
-      Module.delete_attribute(__MODULE__, :help)
-      @listeners %{type: :respond, matcher: unquote(regex), f: unquote(f), help: help}
-    end
+    build_listener(:respond, regex, f)
   end
 
   @doc """
@@ -81,13 +67,17 @@ defmodule Fawkes.Listener do
   argument being the current state for the handler.
   """
   defmacro listen(matcher, f) do
+    build_listener(:listen, matcher, f)
+  end
+
+  defp build_listener(type, matcher, f) do
     matcher = Macro.escape(matcher)
     f       = Macro.escape(f)
 
     quote do
       help = Module.get_attribute(__MODULE__, :help)
       Module.delete_attribute(__MODULE__, :help)
-      @listeners %{type: :listen, matcher: unquote(matcher), f: unquote(f), help: help}
+      @listeners %{type: unquote(type), matcher: unquote(matcher), f: unquote(f), help: help}
     end
   end
 
