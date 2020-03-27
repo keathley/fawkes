@@ -28,7 +28,6 @@ defmodule Fawkes.EventProducer do
 
   def handle_call({:set_bot_name, name}, _from, state) do
     state = %{state | bot: %{state.bot | bot_name: name}}
-    # state = put_in(state, [:bot, :bot_name], name)
     {:reply, :ok, [], state}
   end
 
