@@ -10,7 +10,7 @@ defmodule Fawkes.Event do
     defstruct [
       bot: nil,
       text: "",
-      user: %{id: nil, name: nil},
+      user: %{id: nil, real_name: nil},
       channel: %{id: nil, name: nil},
       mentions: [],
     ]
@@ -19,7 +19,7 @@ defmodule Fawkes.Event do
   defmodule ReactionAdded do
     defstruct [
       bot: nil,
-      user: %{id: nil, name: nil},
+      user: %{id: nil, real_name: nil},
       reaction: nil,
       item: %{channel_id: nil, ts: nil, type: nil},
       item_user: "",
@@ -29,7 +29,7 @@ defmodule Fawkes.Event do
   defmodule ReactionRemoved do
     defstruct [
       bot: nil,
-      user: %{id: nil, name: nil},
+      user: %{id: nil, real_name: nil},
       reaction: nil,
       item_user: nil,
       item: %{channel_id: nil, ts: nil, type: nil},
@@ -45,7 +45,7 @@ defmodule Fawkes.Event do
     defstruct [
       bot: nil,
       channel: %{id: nil, name: nil},
-      user: %{id: nil, name: nil},
+      user: %{id: nil, real_name: nil},
     ]
   end
 
@@ -53,7 +53,7 @@ defmodule Fawkes.Event do
     defstruct [
       bot: nil,
       channel: %{id: nil, name: nil},
-      user: %{id: nil, name: nil},
+      user: %{id: nil, real_name: nil},
     ]
   end
 end
