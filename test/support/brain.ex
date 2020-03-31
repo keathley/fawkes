@@ -18,7 +18,7 @@ defmodule Fawkes.TestHandlers.Brain do
   get <key> - Gets the value from the bots brain
   """
   hear ~r/get (.*)/, fn [key], event ->
-    {:ok, val} = Fawkes.Bot.get(event.bot, key)
+    val = Fawkes.Bot.get(event.bot, key)
     say(event, "The value of '#{key}' is '#{val}'")
   end
 end

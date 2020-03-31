@@ -16,7 +16,6 @@ defmodule FawkesTest do
         {TestHandlers.Brain, nil},
       ],
     ]
-    # {:ok, pid} = Fawkes.start_link(opts)
 
     start_supervised({Fawkes, opts})
 
