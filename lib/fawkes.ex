@@ -70,7 +70,9 @@ defmodule Fawkes do
       brain_args
       |> Keyword.put(:name, brain_name(name))
 
-    children = [{brain, brain_args}] ++ pipeline ++ [{adapter, adapter_args}]
+    http_client = {Finch, name: Fawkes.HTTPClient}
+
+    children = [http_client, {brain, brain_args}] ++ pipeline ++ [{adapter, adapter_args}]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
