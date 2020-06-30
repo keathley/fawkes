@@ -9,6 +9,7 @@ defmodule Fawkes.Event do
   defmodule Message do
     defstruct [
       bot: nil,
+      id: nil,
       text: "",
       user: %{id: nil, real_name: nil},
       channel: %{id: nil, name: nil},
@@ -19,20 +20,22 @@ defmodule Fawkes.Event do
   defmodule ReactionAdded do
     defstruct [
       bot: nil,
+      id: nil,
+      item_id: nil,
+      channel: %{id: nil, name: nil},
       user: %{id: nil, real_name: nil},
       reaction: nil,
-      item: %{channel_id: nil, ts: nil, type: nil},
-      item_user: "",
     ]
   end
 
   defmodule ReactionRemoved do
     defstruct [
       bot: nil,
+      id: nil,
+      item_id: nil,
+      channel: %{id: nil, name: nil},
       user: %{id: nil, real_name: nil},
       reaction: nil,
-      item_user: nil,
-      item: %{channel_id: nil, ts: nil, type: nil},
     ]
   end
 
