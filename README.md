@@ -129,7 +129,7 @@ which formats and sends the message based on the conventions of that adapter.
 ```elixir
 def deps do
   [
-    {:fawkes, "~> 0.3"}
+    {:fawkes, "~> 0.4"}
   ]
 end
 ```
