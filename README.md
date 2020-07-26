@@ -17,7 +17,7 @@ Fawkes.start_link([
   bot_name: "fawkes",
   bot_alias: ".",
   brain: {Fawkes.Brain.Redis, []},
-  adapter: {Slack, [token: "SOME SLACK TOKEN"]},
+  adapter: {Fawkes.Adapter.Slack, [token: "SOME SLACK TOKEN"]},
   handlers: [
     {Echo, nil},
     {Shipit, urls},
