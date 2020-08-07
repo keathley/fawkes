@@ -95,8 +95,9 @@ defmodule Fawkes.Adapter.Slack.RTM do
   end
 
   defp build_event(%{"type" => "message"}=event, state) do
-    user    = get_user(event["user"], state)
-    channel = get_channel(event["channel"], state)
+    user        = get_user(event["user"], state)
+    channel     = get_channel(event["channel"], state)
+    attachments = get_attachments(event["attachments"])
 
     %Message{
       bot: self(),
@@ -104,6 +105,7 @@ defmodule Fawkes.Adapter.Slack.RTM do
       text: replace_links(event["text"]),
       user: user,
       channel: channel,
+      attachments: attachments,
     }
   end
 
@@ -212,6 +214,39 @@ defmodule Fawkes.Adapter.Slack.RTM do
         _error -> {:ignore, %{id: user, name: nil, real_name: nil}}
       end
     end)
+  end
+
+  defp get_attachments(attachments) when is_list(attachments) do
+    attachments
+    |> Enum.map(&get_attachment/1)
+  end
+  defp get_attachments(_), do: []
+
+  def get_attachment(attachment) do
+    fields = get_fields(get_in(attachment, ["fields"]))
+
+    %{
+      pretext: get_in(attachment, ["pretext"]),
+      author_name: get_in(attachment, ["author_name"]),
+      title: get_in(attachment, ["title"]),
+      text: get_in(attachment, ["text"]),
+      fields: fields,
+      footer: get_in(attachment, ["footer"])
+    }
+  end
+
+  defp get_fields(fields) when is_list(fields) do
+    fields
+    |> Enum.map(&get_field/1)
+  end
+  defp get_fields(_), do: []
+
+  defp get_field(field) do
+    %{
+      title: get_in(field, ["title"]),
+      value: get_in(field, ["value"]),
+      short: get_in(field, ["short"])
+    }
   end
 
   defp slack_host do
