@@ -96,6 +96,7 @@ defmodule Fawkes.Adapter.Slack.RTM do
 
   defp build_event(%{"type" => "message"}=event, state) do
     user        = get_user(event["user"], state)
+    app         = get_app(event["bot_profile"])
     channel     = get_channel(event["channel"], state)
     attachments = get_attachments(event["attachments"])
 
@@ -104,6 +105,7 @@ defmodule Fawkes.Adapter.Slack.RTM do
       id: event["ts"],
       text: replace_links(event["text"]),
       user: user,
+      app: app,
       channel: channel,
       attachments: attachments,
     }
@@ -216,6 +218,14 @@ defmodule Fawkes.Adapter.Slack.RTM do
     end)
   end
 
+  defp get_app(bot_profile) do
+    %{
+      id: get_in(bot_profile, ["app_id"]),
+      bot_id: get_in(bot_profile, ["id"]),
+      name: get_in(bot_profile, ["name"]),
+    }
+  end
+
   defp get_attachments(attachments) when is_list(attachments) do
     attachments
     |> Enum.map(&get_attachment/1)
@@ -231,7 +241,7 @@ defmodule Fawkes.Adapter.Slack.RTM do
       title: get_in(attachment, ["title"]),
       text: get_in(attachment, ["text"]),
       fields: fields,
-      footer: get_in(attachment, ["footer"])
+      footer: get_in(attachment, ["footer"]),
     }
   end
 
@@ -245,7 +255,7 @@ defmodule Fawkes.Adapter.Slack.RTM do
     %{
       title: get_in(field, ["title"]),
       value: get_in(field, ["value"]),
-      short: get_in(field, ["short"])
+      short: get_in(field, ["short"]),
     }
   end
 

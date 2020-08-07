@@ -12,6 +12,7 @@ defmodule Fawkes.Event do
       id: nil,
       text: "",
       user: %{id: nil, real_name: nil},
+      app: %{id: nil, bot_id: nil, name: nil},
       channel: %{id: nil, name: nil},
       mentions: [],
       attachments: [],
