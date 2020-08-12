@@ -40,4 +40,3 @@ defmodule Fawkes.Adapter.TestAdapter do
     {:reply, :ok, state}
   end
 end
-

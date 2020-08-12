@@ -35,12 +35,14 @@ defmodule Fawkes.MixProject do
   defp deps do
     [
       {:gen_stage, "~> 1.0"},
-      {:ex_doc, "~> 0.19", only: [:dev, :test]},
       {:redix, "~> 0.10"},
       {:websocket_client, "~> 1.3"},
       {:finch, "~> 0.3"},
       {:jason, "~> 1.2"},
       {:mentat, "~> 0.2"},
+
+      {:credo, "~> 1.4", only: [:dev, :test]},
+      {:ex_doc, "~> 0.19", only: [:dev, :test]},
     ]
   end
 

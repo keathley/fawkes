@@ -7,6 +7,7 @@ defmodule Fawkes.Event do
   @type t :: term()
 
   defmodule Message do
+    @moduledoc false
     defstruct [
       bot: nil,
       id: nil,
@@ -20,6 +21,7 @@ defmodule Fawkes.Event do
   end
 
   defmodule ReactionAdded do
+    @moduledoc false
     defstruct [
       bot: nil,
       id: nil,
@@ -31,6 +33,7 @@ defmodule Fawkes.Event do
   end
 
   defmodule ReactionRemoved do
+    @moduledoc false
     defstruct [
       bot: nil,
       id: nil,
@@ -42,11 +45,12 @@ defmodule Fawkes.Event do
   end
 
   defmodule TopicChanged do
-    # Our slack adapter can't currently grab this yet.
+    @moduledoc false
     defstruct [channel: %{id: nil, name: nil}]
   end
 
   defmodule ChannelJoined do
+    @moduledoc false
     defstruct [
       bot: nil,
       channel: %{id: nil, name: nil},
@@ -55,6 +59,7 @@ defmodule Fawkes.Event do
   end
 
   defmodule ChannelLeft do
+    @moduledoc false
     defstruct [
       bot: nil,
       channel: %{id: nil, name: nil},

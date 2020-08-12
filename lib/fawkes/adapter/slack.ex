@@ -1,4 +1,8 @@
 defmodule Fawkes.Adapter.Slack do
+  @moduledoc """
+  This module provides a Slack adapter. A `:token` argument must be provided
+  with the correct api token.
+  """
   @behaviour Fawkes.Adapter
   use Supervisor
 
