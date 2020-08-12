@@ -1,4 +1,8 @@
 defmodule Fawkes.Listener do
+  @moduledoc """
+  Provides a DSL for building a Fawkes.EventHandler.
+  """
+
   defmacro __using__(_opts) do
     quote do
       Module.register_attribute(__MODULE__, :listeners, accumulate: true)
