@@ -1,0 +1,23 @@
+version: 2
+updates:
+- package-ecosystem: mix
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: mentat
+    versions:
+    - 0.6.1
+  - dependency-name: ex_doc
+    versions:
+    - 0.24.0
+  - dependency-name: finch
+    versions:
+    - 0.6.0
+    - 0.6.1
+    - 0.6.2
+  - dependency-name: credo
+    versions:
+    - 1.5.4
