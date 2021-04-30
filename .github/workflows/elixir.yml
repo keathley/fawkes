@@ -83,6 +83,9 @@ jobs:
         elixir: [1.11]
         otp: [23.3]
     steps:
+    - name: Redis Server in GitHub Actions
+      uses: supercharge/redis-github-action@1.1.0
+
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
