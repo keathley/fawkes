@@ -35,7 +35,7 @@ defmodule Fawkes.MixProject do
   defp deps do
     [
       {:gen_stage, "~> 1.0"},
-      {:redix, "~> 0.10"},
+      {:redix, "~> 1.0"},
       {:websocket_client, "~> 1.3"},
       {:finch, "~> 0.3"},
       {:jason, "~> 1.2"},
