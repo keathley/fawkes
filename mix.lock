@@ -22,5 +22,5 @@
   "oath": {:hex, :oath, "0.1.1", "9e96fc0bc94c8e2fe2deb84641f8b4533b7753575ac1829e1db4180f2b5656c4", [:mix], [{:decorator, "~> 1.3", [hex: :decorator, repo: "hexpm", optional: false]}], "hexpm", "d7e32cf0555905d422e5a90e8a7ce49c123710caa0fa2f7840bddbc1a0e93103"},
   "redix": {:hex, :redix, "1.1.5", "6fc460d66a5c2287e83e6d73dddc8d527ff59cb4d4f298b41e03a4db8c3b2bd5", [:mix], [{:castore, "~> 0.1.0", [hex: :castore, repo: "hexpm", optional: true]}, {:telemetry, "~> 0.4.0 or ~> 1.0", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "679afdd4c14502fe9c11387ff1cdcb33065a1cf511097da1eee407f17c7a418b"},
   "telemetry": {:hex, :telemetry, "0.4.3", "a06428a514bdbc63293cd9a6263aad00ddeb66f608163bdec7c8995784080818", [:rebar3], [], "hexpm", "eb72b8365ffda5bed68a620d1da88525e326cb82a75ee61354fc24b844768041"},
-  "websocket_client": {:hex, :websocket_client, "1.4.2", "f1036e3f9427eecdb66808eee56dbcaeb5a1a352306e6a0d0d23a9487205f4d7", [:rebar3], [], "hexpm", "c005e5f8f2f6a8533c497a509dc52f3e6fb42fa2e0d67bff8ebc8802868d84ed"},
+  "websocket_client": {:hex, :websocket_client, "1.5.0", "e825f23c51a867681a222148ed5200cc4a12e4fb5ff0b0b35963e916e2b5766b", [:rebar3], [], "hexpm", "2b9b201cc5c82b9d4e6966ad8e605832eab8f4ddb39f57ac62f34cb208b68de9"},
 }
